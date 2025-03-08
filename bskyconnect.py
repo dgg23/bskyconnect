@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-#title           : bskyfollows.py
+#title           : bskyconnect.py
 #description     : Automated connection management
 #author          : tellynumner
 #date            : 03/05/25
 #version         : 1.0
-#usage           : ./bskyconnect.py
+#usage           : ./bskyconnect.py --account ACCOUNT --program PROGRAM
 #notes           :
 #python_version  : 3.12.3
 #=============================================================================
