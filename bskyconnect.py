@@ -32,7 +32,7 @@ def logger(level, message):
     now = datetime.datetime.now()
     ts = '[' + now.strftime("%d %b %Y %H:%M:%S") + ']'
     copy = ts + ' ' + level + ' ' + message
-    with open('bskyfollows.log', 'a') as lf:
+    with open('bskyconnect.log', 'a') as lf:
         lf.write(copy + '\n')
     print(copy)
     return None
