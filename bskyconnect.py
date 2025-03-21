@@ -3,7 +3,7 @@
 #description     : Automated connection management
 #author          : tellynumner
 #date            : 03/21/25
-#version         : 1.2
+#version         : 1.3
 #usage           : ./bskyconnect.py --account ACCOUNT --program PROGRAM
 #notes           :
 #python_version  : 3.12.3
@@ -24,6 +24,7 @@ def my_args():
     parser = argparse.ArgumentParser(description='bskyconnect')
     parser.add_argument("--account", help="Pass a Bluesky account username.")
     parser.add_argument("--program", help="follows, followers, both, connect")
+    parser.add_argument("--limit", help="Pass a numeric limit for the connect program.")
     args = parser.parse_args()
     return args
 
@@ -32,7 +33,7 @@ def logger(level, message):
     now = datetime.datetime.now()
     ts = '[' + now.strftime("%y/%m/%d %H:%M:%S") + ']'
     copy = ts + ' ' + level + ' ' + message
-    with open('bskyconnect.log', 'a') as lf:
+    with open('bskyconnectnew.log', 'a') as lf:
         lf.write(copy + '\n')
     print(copy)
     return None
@@ -142,7 +143,7 @@ def influencer_check(user, ratio):
     else:
         return 'REGULAR_JOE'
     
-def manage_followers(follower_list, days_ago, connect=None):
+def manage_followers(follower_list, days_ago, limit=None):
     """
     Takes the follower list and, for each follwer, checks to see if we're following them.
     If not, checks to see if the most recent post date for the account is as recent as some days
@@ -158,8 +159,8 @@ def manage_followers(follower_list, days_ago, connect=None):
             if last_post == 'CURRENT':
                 follow_user(follower)
                 count += 1
-                if connect != None:
-                    if count >= 5000:
+                if limit != None:
+                    if count >= int(limit):
                         logger('CONNECTDONE', follower.handle)
                         sys.exit(0)
             else:
@@ -227,10 +228,13 @@ def main():
         manage_follows(following)
         logger('BSKYFOLLOWS', 'Follows management complete for ' + my_user + '.')
     elif args.program == 'connect':
+        if not args.limit:
+            logger('ARGUMENTS', 'Please pass a limit for the connect program.')
+            sys.exit(1)
         logger('BSKYCONNECT', 'Beginning BlueskyConnect for ' + my_user + '.')
         logger('BSKYCONNECT', 'Targeting the connections of ' + args.account + '.')
         target = get_followers(args.account)
-        manage_followers(target, 2, 'connect')
+        manage_followers(target, 2, args.limit)
         logger('BSKYCONNECT', 'Follower selection complete for ' + my_user + '.')
     logger('BSKYCONNECT', 'Finished!')
 
