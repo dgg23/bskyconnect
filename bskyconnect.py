@@ -4,7 +4,7 @@
 #author          : tellynumner
 #date            : 03/21/25
 #version         : 1.3
-#usage           : ./bskyconnect.py --account ACCOUNT --program PROGRAM
+#usage           : ./bskyconnect.py --account ACCOUNT --program PROGRAM --limit LIMIT
 #notes           :
 #python_version  : 3.12.3
 #=============================================================================
