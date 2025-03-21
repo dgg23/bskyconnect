@@ -2,8 +2,8 @@
 #title           : bskyconnect.py
 #description     : Automated connection management
 #author          : tellynumner
-#date            : 03/13/25
-#version         : 1.1
+#date            : 03/21/25
+#version         : 1.2
 #usage           : ./bskyconnect.py --account ACCOUNT --program PROGRAM
 #notes           :
 #python_version  : 3.12.3
@@ -70,7 +70,7 @@ def follow_user(user):
 def unfollow_user(user):
     '''Unfollows a user'''
     try:
-        client.delete_follow(user.viewer.following)
+        client.delete_follow(user.viewer['following'])
         time.sleep(2)
         logger('REMOVED', user.handle)
     except:
@@ -87,17 +87,15 @@ def follow_check(user):
     if follow is not None:
         return 'FOLLOWING'
     else:
-        #logger('WEDONTFOLLOW', "We don't follow " + user.handle + '.')
         return None
 
 def follower_check(user):
     '''Checks to see if a user follows us.'''
-    follows = ''
     try:
         follows = user.viewer['followed_by']
     except:
         logger('FAILED', "We failed to get the follow status for " + user.handle + '.')
-        follows = 'FOLLOWS'
+        return "FOLLOWS"
     if follows != None:
         return "FOLLOWS"
     else:
@@ -161,7 +159,7 @@ def manage_followers(follower_list, days_ago, connect=None):
                 follow_user(follower)
                 count += 1
                 if connect != None:
-                    if count >= 3000:
+                    if count >= 5000:
                         logger('CONNECTDONE', follower.handle)
                         sys.exit(0)
             else:
@@ -180,11 +178,11 @@ def manage_follows(follows_list):
         last_post = last_post_date(follow, 14)
         follower_ratio = influencer_check(follow, 3)
         following = follower_check(follow)
-        logger('REVIEWING:', follow.handle)
+        logger('REVIEWING', follow.handle)
         if follower_ratio == 'INFLUENCER':
-            logger('INFLUENCER:', follow.handle)
+            logger('INFLUENCER', follow.handle)
         else:
-            logger('REGULARJOE:', follow.handle)
+            logger('REGULARJOE', follow.handle)
             if last_post == 'CURRENT':
                 logger('POSTSCURRENT', follow.handle)
             elif last_post == 'OLD':
