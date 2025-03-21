@@ -30,7 +30,7 @@ def my_args():
 def logger(level, message):
     '''Logs a message to a file and prints it to the screen.'''
     now = datetime.datetime.now()
-    ts = '[' + now.strftime("%d %b %Y %H:%M:%S") + ']'
+    ts = '[' + now.strftime("%y/%m/%d %H:%M:%S") + ']'
     copy = ts + ' ' + level + ' ' + message
     with open('bskyconnect.log', 'a') as lf:
         lf.write(copy + '\n')
@@ -62,7 +62,7 @@ def follow_user(user):
     try:
         client.follow(user.did)
         time.sleep(2)
-        logger('FOLLOWED', 'Followed ' + user.handle + '.')
+        logger('FOLLOWED', user.handle)
     except:
         logger('FAILED', 'Failed to follow ' + user.handle + '.' )
     return None
@@ -72,7 +72,7 @@ def unfollow_user(user):
     try:
         client.delete_follow(user.viewer.following)
         time.sleep(2)
-        logger('UNFOLLOWED', 'Unfollowed ' + user.handle + '.')
+        logger('REMOVED', user.handle)
     except:
         logger('FAILED', 'Failed to unfollow ' + user.handle + '.' )
     return None
@@ -80,14 +80,14 @@ def unfollow_user(user):
 def follow_check(user):
     '''Checks to see if we follow a user.'''
     try:
-        logger('DOWEFOLLOW', 'Checking to see if we follow ' + user.handle + '.')
         follow = user.viewer['following']
     except:
         logger('FAILED', "We failed get the follow status for " + user.handle + '.')
+        return 'FOLLOWING'
     if follow is not None:
-        return "FOLLOWING"
+        return 'FOLLOWING'
     else:
-        ('WEDONTFOLLOW', "We don't follow " + user.handle + '.')
+        #logger('WEDONTFOLLOW', "We don't follow " + user.handle + '.')
         return None
 
 def follower_check(user):
@@ -136,7 +136,7 @@ def influencer_check(user, ratio):
     followers = int(profile.followers_count)
     follows = int(profile.follows_count)
     if followers == 0 or follows == 0:
-        logger('BOTALERT', 'User has no follows or followers. Probable bot.')
+        logger('BOTALERT', user.handle)
         return 'BOTALERT'
     follower_ratio = followers / follows
     if follower_ratio >= ratio and followers > 10000:
@@ -155,19 +155,17 @@ def manage_followers(follower_list, days_ago, connect=None):
         following = follow_check(follower)
         last_post = last_post_date(follower, days_ago)
         if following == 'FOLLOWING':
-            logger('ALREADYFOLLOW', 'We already follow '+ follower.handle + '. Moving on.')
+            logger('ALREADYFOLLOW', follower.handle)
         else:
-            logger('WEDONTFOLLOW', "We don't follow " + follower.handle + '.')
             if last_post == 'CURRENT':
-                logger('FOLLOWING', 'Following ' + follower.handle + '.')
                 follow_user(follower)
                 count += 1
                 if connect != None:
                     if count >= 3000:
-                        logger('CONNECTDONE', 'Maximum follow count reached!')
+                        logger('CONNECTDONE', follower.handle)
                         sys.exit(0)
             else:
-                logger('HASNTPOSTED', follower.handle + " hasn't posted recently. Not following.")
+                logger('HASNTPOSTED', follower.handle)
     return None
     
 def manage_follows(follows_list):
@@ -182,27 +180,26 @@ def manage_follows(follows_list):
         last_post = last_post_date(follow, 14)
         follower_ratio = influencer_check(follow, 3)
         following = follower_check(follow)
-        logger('BEGIN', 'Scrutinizing follow connection: ' + follow.handle + '.')
+        logger('REVIEWING:', follow.handle)
         if follower_ratio == 'INFLUENCER':
-            logger('INFLUENCER', follow.handle + ' is an influencer.')
+            logger('INFLUENCER:', follow.handle)
         else:
-            logger('REGULARJOE', follow.handle + ' is not an ifluencer.')
+            logger('REGULARJOE:', follow.handle)
             if last_post == 'CURRENT':
-                logger('POSTSCURRENT', 'Post history for ' + follow.handle +  ' is current.')
+                logger('POSTSCURRENT', follow.handle)
             elif last_post == 'OLD':
-                logger('HASNTPOSTED', follow.handle + " hasn't posted recently.")
+                logger('HASNTPOSTED', follow.handle)
                 unfollow_user(follow)
             elif last_post == 'BOTALERT':
                 unfollow_user(follow)
             if following == 'FOLLOWS':
-                logger('THEYFOLLOW', follow.handle + ' follows us.')
+                logger('FOLLOWSUS', follow.handle)
             else:
-                logger('DOESNTFOLLOW', follow.handle + " doesn't follow us. Checking if they're an influencer.")
+                logger('DOESNTFOLLOW', follow.handle)
                 if follower_ratio == 'REGULAR_JOE':
-                    logger('REGULARJOE', 'Unfollowing ' + follow.handle + '.')
                     unfollow_user(follow)
                 elif follower_ratio == 'BOTALERT':
-                    logger('BOTALERT', follow.handle + ' has no follows or followers.')
+                    logger('BOTALERT', follow.handle)
                     unfollow_user(follow)
     return None
 
@@ -223,21 +220,21 @@ def main():
         manage_follows(following)
         logger('BSKYFOLLOWS', 'Follows management complete for ' + my_user + '.')
     elif args.program == 'both':
-        logger('BSKYCONNECT', 'Beginning follower management for ' + my_user + '.')
+        logger('BSKYFOLLOWER', 'Beginning follower management for ' + my_user + '.')
         followers = get_followers(my_user)
         manage_followers(followers, 14)
-        logger('BSKYCONNECT', 'Follower management complete for ' + my_user + '.')
-        logger('BSKYCONNECT', 'Beginning follows management for ' + my_user + '.')
+        logger('BSKYFOLLOWER', 'Follower management complete for ' + my_user + '.')
+        logger('BSKYFOLLOWS', 'Beginning follows management for ' + my_user + '.')
         following = get_follows(my_user)
-        manage_follows(folflowing)
-        logger('BSKYCONNECT', 'Follows management complete for ' + my_user + '.')
+        manage_follows(following)
+        logger('BSKYFOLLOWS', 'Follows management complete for ' + my_user + '.')
     elif args.program == 'connect':
         logger('BSKYCONNECT', 'Beginning BlueskyConnect for ' + my_user + '.')
         logger('BSKYCONNECT', 'Targeting the connections of ' + args.account + '.')
         target = get_followers(args.account)
         manage_followers(target, 2, 'connect')
         logger('BSKYCONNECT', 'Follower selection complete for ' + my_user + '.')
-    logger('DONE', 'Finished!')
+    logger('BSKYCONNECT', 'Finished!')
 
 if __name__ == '__main__':
     main()
