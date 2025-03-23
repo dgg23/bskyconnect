@@ -128,8 +128,9 @@ def last_post_date(user, days_ago):
         return 'OLD'
 
 def influencer_check(user, ratio):
-    """Checks a user's profile for their follower/following count to try to determine their follower
-       to follow ratio which determines whether or not they are an influencer.
+    """
+    Checks a user's profile for their follower/following count to try to determine their follower
+    to follower ratio which determines whether or not they are an influencer.
     """
     profile = client.get_profile(user.did)
     followers = int(profile.followers_count)
