@@ -33,7 +33,7 @@ def logger(level, message):
     now = datetime.datetime.now()
     ts = '[' + now.strftime("%y/%m/%d %H:%M:%S") + ']'
     copy = ts + ' ' + level + ' ' + message
-    with open('bskyconnectnew.log', 'a') as lf:
+    with open('bskyconnect.log', 'a') as lf:
         lf.write(copy + '\n')
     print(copy)
     return None
@@ -179,7 +179,6 @@ def manage_follows(follows_list):
         last_post = last_post_date(follow, 14)
         follower_ratio = influencer_check(follow, 3)
         following = follower_check(follow)
-        logger('REVIEWING', follow.handle)
         if follower_ratio == 'INFLUENCER':
             logger('INFLUENCER', follow.handle)
         else:
