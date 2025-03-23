@@ -145,26 +145,29 @@ def influencer_check(user, ratio):
     
 def manage_followers(follower_list, days_ago, limit=None):
     """
-    Takes the follower list and, for each follwer, checks to see if we're following them.
-    If not, checks to see if the most recent post date for the account is as recent as some days
-    ago, and if so, it follows back.
+    Takes the follower list and, for each follwer, checks to see if their post history is current.
+    If it is, we check to see if we are following them. If so, we log that information and move 
+    on to the next follower. If not, we follow the user. If the user's post history is not current,
+    and if we are following the user, we unfollow the user.
     """
     count = 0
     for follower in follower_list:
         following = follow_check(follower)
         last_post = last_post_date(follower, days_ago)
-        if following == 'FOLLOWING':
-            logger('ALREADYFOLLOW', follower.handle)
-        else:
-            if last_post == 'CURRENT':
+        if last_post == 'CURRENT':
+            if following == 'FOLLOWING':
+                logger('ALREADYFOLLOW', follower.handle)
+            else:
                 follow_user(follower)
                 count += 1
                 if limit != None:
                     if count >= int(limit):
                         logger('CONNECTDONE', follower.handle)
                         sys.exit(0)
-            else:
-                logger('HASNTPOSTED', follower.handle)
+        else:
+            logger('HASNTPOSTED', follower.handle)
+            if following == 'FOLLOWING':
+                unfollow_user(follower)
     return None
     
 def manage_follows(follows_list):
