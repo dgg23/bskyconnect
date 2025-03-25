@@ -155,7 +155,7 @@ def manage_followers(follower_list, days_ago, limit=None):
     for follower in follower_list:
         following = follow_check(follower)
         last_post = last_post_date(follower, days_ago)
-        logger('BSKYFOLLOWERS', 'Start ' + follow.handle)
+        logger('BSKYFOLLOWERS', 'Start ' + follower.handle)
         if last_post == 'CURRENT':
             if following == 'FOLLOWING':
                 logger('ALREADYFOLLOW', follower.handle)
