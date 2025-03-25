@@ -155,6 +155,7 @@ def manage_followers(follower_list, days_ago, limit=None):
     for follower in follower_list:
         following = follow_check(follower)
         last_post = last_post_date(follower, days_ago)
+        logger('BSKYFOLLOWERS', 'Start ' + follow.handle)
         if last_post == 'CURRENT':
             if following == 'FOLLOWING':
                 logger('ALREADYFOLLOW', follower.handle)
@@ -179,10 +180,10 @@ def manage_follows(follows_list):
     back, and if so, the connection is preserved else we unfollow the user.
     '''
     for follow in follows_list:
-        result = ''
         last_post = last_post_date(follow, 14)
         follower_ratio = influencer_check(follow, 3)
         following = follower_check(follow)
+        logger('BSKYFOLLOWS', 'Start ' + follow.handle)
         if follower_ratio == 'INFLUENCER':
             logger('INFLUENCER', follow.handle)
         else:
@@ -212,10 +213,10 @@ def main():
         logger('ARGUMENTS', 'Please pass both an account username and a program type.')
         sys.exit(1)
     if args.program == 'followers':
-        logger('BSKYFOLLOWER', 'Beginning follower management for ' + my_user + '.')
+        logger('BSKYFOLLOWERS', 'Beginning follower management for ' + my_user + '.')
         followers = get_followers(my_user)
         manage_followers(followers, 14)
-        logger('BSKYFOLLOWER', 'Follower management complete for ' + my_user + '.')
+        logger('BSKYFOLLOWERS', 'Follower management complete for ' + my_user + '.')
     elif args.program == 'follows':
         logger('BSKYFOLLOWS', 'Beginning follows management for ' + my_user + '.')
         following = get_follows(my_user)
