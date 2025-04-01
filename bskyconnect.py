@@ -65,7 +65,7 @@ def follow_user(user):
         time.sleep(2)
         logger('FOLLOWED', user.handle)
     except:
-        logger('FAILED', 'Failed to follow ' + user.handle + '.' )
+        logger('FAILED', 'Failed to follow ' + user.handle)
     return None
 
 def unfollow_user(user):
@@ -75,7 +75,7 @@ def unfollow_user(user):
         time.sleep(2)
         logger('REMOVED', user.handle)
     except:
-        logger('FAILED', 'Failed to unfollow ' + user.handle + '.' )
+        logger('FAILED', 'Failed to unfollow ' + user.handle)
     return None
 
 def follow_check(user):
@@ -83,7 +83,7 @@ def follow_check(user):
     try:
         follow = user.viewer['following']
     except:
-        logger('FAILED', "We failed get the follow status for " + user.handle + '.')
+        logger('FAILED', "We failed get the follow status for " + user.handle)
         return 'FOLLOWING'
     if follow is not None:
         return 'FOLLOWING'
@@ -95,7 +95,7 @@ def follower_check(user):
     try:
         follows = user.viewer['followed_by']
     except:
-        logger('FAILED', "We failed to get the follow status for " + user.handle + '.')
+        logger('FAILED', "We failed to get the follow status for " + user.handle)
         return "FOLLOWS"
     if follows != None:
         return "FOLLOWS"
@@ -111,16 +111,16 @@ def last_post_date(user, days_ago):
     try:
         response = client.get_author_feed(user.handle)
     except:
-        logger('FAILED', "We failed to scan " + user.handle + " feed! Skipping the last post date check.")
+        logger('FAILED', "We failed to scan feed for " + user.handle)
         return 'CURRENT'
     if len(response.feed) > 0:
         try:
             last_post = datetime.datetime.fromisoformat(response.feed[1].post.indexed_at)
         except:
-            logger('BOTALERT', user.handle + ' only has 1 post!')
+            logger('BOTALERT', user.handle)
             return 'BOTALERT'
     else:
-        logger('BOTALERT', user.handle + ' has never posted!')
+        logger('BOTALERT', user.handle)
         return 'BOTALERT'
     if last_post > days_ago:
         return 'CURRENT'
@@ -155,7 +155,6 @@ def manage_followers(follower_list, days_ago, limit=None):
     for follower in follower_list:
         following = follow_check(follower)
         last_post = last_post_date(follower, days_ago)
-        logger('BSKYFOLLOWERS', 'Start ' + follower.handle)
         if last_post == 'CURRENT':
             if following == 'FOLLOWING':
                 logger('ALREADYFOLLOW', follower.handle)
@@ -164,7 +163,7 @@ def manage_followers(follower_list, days_ago, limit=None):
                 count += 1
                 if limit != None:
                     if count >= int(limit):
-                        logger('LIMITREACHED', 'Connect program limit reached!')
+                        logger('LIMITREACHED', 'Connect program limit reached for ' + follower.handle)
                         sys.exit(0)
         else:
             logger('HASNTPOSTED', follower.handle)
@@ -183,7 +182,6 @@ def manage_follows(follows_list):
         last_post = last_post_date(follow, 14)
         follower_ratio = influencer_check(follow, 3)
         following = follower_check(follow)
-        logger('BSKYFOLLOWS', 'Start ' + follow.handle)
         if follower_ratio == 'INFLUENCER':
             logger('INFLUENCER', follow.handle)
         else:
@@ -209,9 +207,6 @@ def manage_follows(follows_list):
 def main():
     '''Main processing function'''
     args = my_args()
-    if not args.account or not args.program:
-        logger('ARGUMENTS', 'Please pass both an account username and a program type.')
-        sys.exit(1)
     if args.program == 'followers':
         logger('BSKYFOLLOWERS', 'Beginning follower management for ' + my_user + '.')
         followers = get_followers(my_user)
@@ -232,11 +227,11 @@ def main():
         manage_follows(following)
         logger('BSKYFOLLOWS', 'Follows management complete for ' + my_user + '.')
     elif args.program == 'connect':
-        if not args.limit:
-            logger('ARGUMENTS', 'Please pass a limit for the connect program.')
+        if not args.account or not args.program or not args.limit:
+            logger('ARGUMENTS', 'Please pass an account username, a program type and a limit.')
             sys.exit(1)
-        logger('BSKYCONNECT', 'Beginning BlueskyConnect for ' + my_user + '.')
-        logger('BSKYCONNECT', 'Targeting the connections of ' + args.account + '.')
+        logger('BSKYCONNECT', 'Beginning BSKYCONNECT for ' + my_user + '.')
+        logger('BSKYCONNECT', 'Targeting the followers of ' + args.account + '.')
         target = get_followers(args.account)
         manage_followers(target, 2, args.limit)
         logger('BSKYCONNECT', 'Follower selection complete for ' + my_user + '.')
