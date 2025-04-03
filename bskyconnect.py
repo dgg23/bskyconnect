@@ -163,7 +163,7 @@ def manage_followers(follower_list, days_ago, limit=None):
                 count += 1
                 if limit != None:
                     if count >= int(limit):
-                        logger('LIMITREACHED', 'Connect program limit reached for ' + follower.handle)
+                        logger('LIMITREACHED', 'Connect program limit reached for ' + my_user + '.')
                         sys.exit(0)
         else:
             logger('HASNTPOSTED', follower.handle)
